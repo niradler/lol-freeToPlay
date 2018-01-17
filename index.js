@@ -2,10 +2,10 @@ const express = require('express')
 const app = express()
 const axios = require('axios')
 const env = require('dotenv').config();
-let updated_at=new Date(),champions=[];
+var updated_at=new Date(),champions=[];
 app.get('/champions', async (req, res) => {
     if(champions.length > 0 && (new Date()  - updated_at)/1000 < (1000*60*60) ){
-        return res.json(champions)
+        return res.status(202).json(champions)
     }
     try {
         let champions_id = [];
@@ -20,11 +20,13 @@ app.get('/champions', async (req, res) => {
              url: 'https://eun1.api.riotgames.com/lol/static-data/v3/champions?locale=en_US&tags=all&dataById=true',
              headers:{ "X-Riot-Token": process.env.API_KEY},
            });
+          // console.log('ids',champions_id)
           for (const key in champions_data.data.data) {
-             if(champions_id.indexOf(key)>-1){
+             // console.log('key',key,'champ',champions_data.data.data[key])
+             if(champions_id.indexOf(Number(key))>-1){
                  let champ = champions_data.data.data[key];
-                 champ.img = 'http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/Aatrox.png';
-                 champ.loading_img = 'http://ddragon.leagueoflegends.com/cdn/img/champion/loading/Aatrox_0.jpg';
+                 champ.img = 'http://ddragon.leagueoflegends.com/cdn/6.24.1/img/champion/'+champ.image.full;
+                 champ.loading_img = 'http://ddragon.leagueoflegends.com/cdn/img/champion/loading/'+champ.key+'_0.jpg';
                  champions.push(champ)
              }
           }
